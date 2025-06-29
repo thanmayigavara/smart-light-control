@@ -1,0 +1,25 @@
+#include <WiFi.h>
+const char* ssid = "YourWiFiSSID";
+const char* password = "YourWiFiPassword";
+
+#define LED_PIN 5
+
+WiFiServer server(80);
+
+void setup() {
+  pinMode(LED_PIN, OUTPUT);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) delay(500);
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (client) {
+    String request = client.readStringUntil('\r');
+    if (request.indexOf("/ON") != -1) digitalWrite(LED_PIN, HIGH);
+    if (request.indexOf("/OFF") != -1) digitalWrite(LED_PIN, LOW);
+    client.println("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nLED Control");
+    client.stop();
+  }
+}
